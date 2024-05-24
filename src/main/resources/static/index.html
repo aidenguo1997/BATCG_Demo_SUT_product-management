@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>產品管理</title>
+
+    <!-- 引入 Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-gH2yIJqKdNHPEq0n4Mqa/HGKIhSkIHeL5AyhkYV8i59U5AR6csBvApHHNl/vI1Bx" crossorigin="anonymous">
+
+    <!-- 引入 jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+    <!-- 引入 Bootstrap JS（Bootstrap 需要 Popper.js） -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa"
+            crossorigin="anonymous"></script>
+
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="mb-4">產品管理</h1>
+
+    <!-- 創建產品的表單 -->
+    <div class="mb-4">
+        <h2>創建產品</h2>
+        <form id="createProductForm">
+            <div class="mb-3">
+                <label for="productName" class="form-label">產品名稱：</label>
+                <input type="text" id="productName" class="form-control" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="productPrice" class="form-label">產品價格：</label>
+                <input type="number" id="productPrice" class="form-control" required>
+            </div>
+
+            <button type="button" class="btn btn-primary" onclick="createProduct()">創建產品</button>
+        </form>
+    </div>
+
+    <!-- 產品列表 -->
+    <div>
+        <h2>產品列表</h2>
+        <ul id="productList" class="list-group">
+            <!-- 產品條目將會動態添加在這裡 -->
+        </ul>
+    </div>
+
+    <!-- 更新產品的模態 -->
+    <div class="modal fade" id="updateProductModal" tabindex="-1" aria-labelledby="updateProductModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- 模態頭部 -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateProductModalLabel">更新產品</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <!-- 模態主體 -->
+                <div class="modal-body">
+                    <form id="updateProductForm">
+                        <div class="mb-3">
+                            <label for="updatedProductName" class="form-label">更新後的產品名稱：</label>
+                            <input type="text" id="updatedProductName" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="updatedProductPrice" class="form-label">更新後的產品價格：</label>
+                            <input type="number" id="updatedProductPrice" class="form-control" required>
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="confirmUpdate()">確定更新</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 刪除產品的模態 -->
+    <div class="modal fade" id="deleteProductModal" tabindex="-1" aria-labelledby="deleteProductModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <!-- 模態頭部 -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteProductModalLabel">確認刪除</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <!-- 模態主體 -->
+                <div class="modal-body">
+                    <p>確定要刪除此產品嗎？此操作將無法撤銷。</p>
+                </div>
+                <!-- 模態底部 -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">確定刪除</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        getProductList();
+        initUpdateModal();
+    });
+
+    // 創建產品的函數
+    function createProduct() {
+        var productName = $('#productName').val();
+        var productPrice = $('#productPrice').val();
+
+        // 發送創建產品的 POST 請求
+        $.ajax({
+            url: '/products',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                name: productName,
+                price: productPrice,
+            }),
+            success: function (data) {
+                console.log('產品創建成功:', data);
+                getProductList();
+                $('#createProductForm')[0].reset();
+            },
+            error: function (error) {
+                console.error('創建產品失敗:', error);
+            }
+        });
+    }
+
+    // 更新產品的函數
+    function confirmUpdate() {
+        var updatedName = $('#updatedProductName').val();
+        var updatedPrice = $('#updatedProductPrice').val();
+
+        // 發送更新產品的 PUT 請求
+        $.ajax({
+            url: `/products/${window.currentProductId}`,
+            type: 'PUT',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                name: updatedName,
+                price: updatedPrice,
+            }),
+            success: function (data) {
+                console.log('產品更新成功:', data);
+                getProductList();
+                $('#updateProductModal').modal('toggle');
+            },
+            error: function (error) {
+                console.error('更新產品失敗:', error);
+            }
+        });
+    }
+
+    // 刪除產品的函數
+    function confirmDelete(productId) {
+        // 點擊刪除按鈕時顯示模態
+        $('#deleteProductModal').modal('toggle');
+
+        // 在模態中確認刪除後再發送刪除請求
+        $('#deleteProductModal').on('click', '.btn-danger', function () {
+            $.ajax({
+                url: `/products/${productId}`,
+                type: 'DELETE',
+                dataType: 'text',
+                success: function (data) {
+                    console.log('產品刪除成功:', data);
+                    getProductList();
+                },
+                error: function (xhr, status, error) {
+                    console.error('刪除產品失敗:', xhr, status, error);
+                    // 顯示詳細的錯誤信息
+                    alert('刪除產品失敗:\n' + xhr.responseText);
+                }
+            });
+        });
+    }
+
+    // 獲取產品列表的函數
+    function getProductList() {
+        // 發送獲取產品列表的 GET 請求
+        $.ajax({
+            url: '/products',
+            type: 'GET',
+            success: function (products) {
+                // 顯示產品列表
+                var productList = $('#productList');
+                productList.empty();
+
+                products.forEach(function (product) {
+                    var listItem = $('<li>').addClass('list-group-item d-flex justify-content-between align-items-center')
+                        .text(`${product.name} - ￥${product.price}`);
+
+                    // 添加更新和刪除按鈕
+                    var buttonGroup = $('<div>').addClass('btn-group');
+
+                    var updateButton = $('<button>').addClass('btn btn-warning me-2').text('更新');
+                    updateButton.on('click', function () {
+                        updateProduct(product.id, product.name, product.price);
+                    });
+
+                    var deleteButton = $('<button>').addClass('btn btn-danger').text('刪除');
+                    deleteButton.on('click', function () {
+                        confirmDelete(product.id);
+                    });
+
+                    buttonGroup.append(updateButton).append(deleteButton);
+                    listItem.append(buttonGroup);
+                    productList.append(listItem);
+                });
+            },
+            error: function (error) {
+                console.error('獲取產品列表失敗:', error);
+            }
+        });
+    }
+
+    // 初始化更新產品的模態
+    function initUpdateModal() {
+        $('#updateProductModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var productId = button.data('product-id');
+            var productName = button.data('product-name');
+            var productPrice = button.data('product-price');
+
+            var modal = $(this);
+            modal.find('#updatedProductName').val(productName);
+            modal.find('#updatedProductPrice').val(productPrice);
+
+            window.currentProductId = productId;
+        });
+    }
+
+    // 更新產品的函數
+    function updateProduct(productId, productName, productPrice) {
+        $('#updateProductModal').modal('show');
+        $('#updatedProductName').val(productName);
+        $('#updatedProductPrice').val(productPrice);
+        window.currentProductId = productId;
+    }
+</script>
+
+</body>
+</html>
