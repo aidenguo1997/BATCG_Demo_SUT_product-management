@@ -17,7 +17,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-A3rJD856KowSb7dwlZdYEkO39Gagi7vIsF0jrRAoQmDKKtQBHUuLZ9AsSv4jD4Xa"
             crossorigin="anonymous"></script>
-
 </head>
 <body>
 <div class="container mt-5">
@@ -31,12 +30,10 @@
                 <label for="productName" class="form-label">產品名稱：</label>
                 <input type="text" id="productName" class="form-control" required>
             </div>
-
             <div class="mb-3">
                 <label for="productPrice" class="form-label">產品價格：</label>
                 <input type="number" id="productPrice" class="form-control" required>
             </div>
-
             <button type="button" class="btn btn-primary" onclick="createProduct()">創建產品</button>
         </form>
     </div>
@@ -178,7 +175,7 @@
     // 刪除產品的函數
     function confirmDelete(productId) {
         window.currentProductId = productId;
-        $('#deleteProductModal').modal('toggle');
+        $('#deleteProductModal').modal('show');
     }
 
     // 獲取產品列表的函數
