@@ -50,7 +50,8 @@
     </div>
 
     <!-- 更新產品的模態 -->
-    <div class="modal fade" id="updateProductModal" tabindex="-1" aria-labelledby="updateProductModalLabel" aria-hidden="true">
+    <div class="modal fade" id="updateProductModal" tabindex="-1" aria-labelledby="updateProductModalLabel"
+         aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <!-- 模態頭部 -->
@@ -77,7 +78,8 @@
     </div>
 
     <!-- 刪除產品的模態 -->
-    <div class="modal fade" id="deleteProductModal" tabindex="-1" aria-labelledby="deleteProductModalLabel" aria-hidden="true">
+    <div class="modal fade" id="deleteProductModal" tabindex="-1" aria-labelledby="deleteProductModalLabel"
+         aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <!-- 模態頭部 -->
@@ -92,7 +94,7 @@
                 <!-- 模態底部 -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-danger" onclick="confirmDelete()">確定刪除</button>
+                    <button type="button" class="btn btn-danger" id="deleteConfirmButton">確定刪除</button>
                 </div>
             </div>
         </div>
@@ -102,6 +104,25 @@
 <script>
     $(document).ready(function () {
         getProductList();
+
+        // 刪除確認按鈕的單一事件處理器
+        $('#deleteConfirmButton').on('click', function () {
+            $.ajax({
+                url: `/products/${window.currentProductId}`,
+                type: 'DELETE',
+                dataType: 'text',
+                success: function (data) {
+                    console.log('產品刪除成功:', data);
+                    getProductList();
+                    $('#deleteProductModal').modal('hide');
+                },
+                error: function (xhr, status, error) {
+                    console.error('刪除產品失敗:', xhr, status, error);
+                    // 顯示詳細的錯誤信息
+                    alert('刪除產品失敗:\n' + xhr.responseText);
+                }
+            });
+        });
     });
 
     // 創建產品的函數
@@ -160,24 +181,6 @@
         $('#deleteProductModal').modal('toggle');
     }
 
-    $('#deleteProductModal').on('click', '.btn-danger', function () {
-        $.ajax({
-            url: `/products/${window.currentProductId}`,
-            type: 'DELETE',
-            dataType: 'text',
-            success: function (data) {
-                console.log('產品刪除成功:', data);
-                getProductList();
-                $('#deleteProductModal').modal('hide');
-            },
-            error: function (xhr, status, error) {
-                console.error('刪除產品失敗:', xhr, status, error);
-                // 顯示詳細的錯誤信息
-                alert('刪除產品失敗:\n' + xhr.responseText);
-            }
-        });
-    });
-
     // 獲取產品列表的函數
     function getProductList() {
         // 發送獲取產品列表的 GET 請求
@@ -214,6 +217,22 @@
             error: function (error) {
                 console.error('獲取產品列表失敗:', error);
             }
+        });
+    }
+
+    // 初始化更新產品的模態
+    function initUpdateModal() {
+        $('#updateProductModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var productId = button.data('product-id');
+            var productName = button.data('product-name');
+            var productPrice = button.data('product-price');
+
+            var modal = $(this);
+            modal.find('#updatedProductName').val(productName);
+            modal.find('#updatedProductPrice').val(productPrice);
+
+            window.currentProductId = productId;
         });
     }
 
