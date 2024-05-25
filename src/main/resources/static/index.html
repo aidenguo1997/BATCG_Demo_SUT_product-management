@@ -102,7 +102,6 @@
 <script>
     $(document).ready(function () {
         getProductList();
-        initUpdateModal();
     });
 
     // 創建產品的函數
@@ -156,28 +155,28 @@
     }
 
     // 刪除產品的函數
-    function confirmDelete() {
-        // 點擊刪除按鈕時顯示模態
+    function confirmDelete(productId) {
+        window.currentProductId = productId;
         $('#deleteProductModal').modal('toggle');
-
-        // 在模態中確認刪除後再發送刪除請求
-        $('#deleteProductModal').on('click', '.btn-danger', function () {
-            $.ajax({
-                url: `/products/${window.currentProductId}`,
-                type: 'DELETE',
-                dataType: 'text',
-                success: function (data) {
-                    console.log('產品刪除成功:', data);
-                    getProductList();
-                },
-                error: function (xhr, status, error) {
-                    console.error('刪除產品失敗:', xhr, status, error);
-                    // 顯示詳細的錯誤信息
-                    alert('刪除產品失敗:\n' + xhr.responseText);
-                }
-            });
-        });
     }
+
+    $('#deleteProductModal').on('click', '.btn-danger', function () {
+        $.ajax({
+            url: `/products/${window.currentProductId}`,
+            type: 'DELETE',
+            dataType: 'text',
+            success: function (data) {
+                console.log('產品刪除成功:', data);
+                getProductList();
+                $('#deleteProductModal').modal('hide');
+            },
+            error: function (xhr, status, error) {
+                console.error('刪除產品失敗:', xhr, status, error);
+                // 顯示詳細的錯誤信息
+                alert('刪除產品失敗:\n' + xhr.responseText);
+            }
+        });
+    });
 
     // 獲取產品列表的函數
     function getProductList() {
@@ -215,22 +214,6 @@
             error: function (error) {
                 console.error('獲取產品列表失敗:', error);
             }
-        });
-    }
-
-    // 初始化更新產品的模態
-    function initUpdateModal() {
-        $('#updateProductModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget);
-            var productId = button.data('product-id');
-            var productName = button.data('product-name');
-            var productPrice = button.data('product-price');
-
-            var modal = $(this);
-            modal.find('#updatedProductName').val(productName);
-            modal.find('#updatedProductPrice').val(productPrice);
-
-            window.currentProductId = productId;
         });
     }
 
