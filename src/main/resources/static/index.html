@@ -127,8 +127,8 @@
 
     // 創建產品的函數
     function createProduct() {
-        var productName = $('#productName').val();
-        var productPrice = $('#productPrice').val();
+        const productName = $('#productName').val();
+        const productPrice = $('#productPrice').val();
 
         // 發送創建產品的 POST 請求
         $.ajax({
@@ -152,8 +152,8 @@
 
     // 更新產品的函數
     function confirmUpdate() {
-        var updatedName = $('#updatedProductName').val();
-        var updatedPrice = $('#updatedProductPrice').val();
+        const updatedName = $('#updatedProductName').val();
+        const updatedPrice = $('#updatedProductPrice').val();
 
         // 發送更新產品的 PUT 請求
         $.ajax({
@@ -189,22 +189,22 @@
             type: 'GET',
             success: function (products) {
                 // 顯示產品列表
-                var productList = $('#productList');
+                const productList = $('#productList');
                 productList.empty();
 
                 products.forEach(function (product) {
-                    var listItem = $('<li>').addClass('list-group-item d-flex justify-content-between align-items-center')
+                    const listItem = $('<li>').addClass('list-group-item d-flex justify-content-between align-items-center')
                         .text(`${product.name} - ￥${product.price}`);
 
                     // 添加更新和刪除按鈕
-                    var buttonGroup = $('<div>').addClass('btn-group');
+                    const buttonGroup = $('<div>').addClass('btn-group');
 
-                    var updateButton = $('<button>').addClass('btn btn-warning me-2').text('更新');
+                    const updateButton = $('<button>').addClass('btn btn-warning me-2').text('更新');
                     updateButton.on('click', function () {
                         updateProduct(product.id, product.name, product.price);
                     });
 
-                    var deleteButton = $('<button>').addClass('btn btn-danger').text('刪除');
+                    const deleteButton = $('<button>').addClass('btn btn-danger').text('刪除');
                     deleteButton.on('click', function () {
                         confirmDelete(product.id);
                     });
@@ -217,22 +217,6 @@
             error: function (error) {
                 console.error('獲取產品列表失敗:', error);
             }
-        });
-    }
-
-    // 初始化更新產品的模態
-    function initUpdateModal() {
-        $('#updateProductModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget);
-            var productId = button.data('product-id');
-            var productName = button.data('product-name');
-            var productPrice = button.data('product-price');
-
-            var modal = $(this);
-            modal.find('#updatedProductName').val(productName);
-            modal.find('#updatedProductPrice').val(productPrice);
-
-            window.currentProductId = productId;
         });
     }
 
